@@ -1,0 +1,51 @@
+{% extends 'inventory/base.html' %}
+{% block content %}
+
+<h2 class="fw-bold mb-4">🏷️ Categories</h2>
+
+<div class="row">
+  <!-- Existing Categories -->
+  <div class="col-md-7">
+    <div class="card shadow-sm">
+      <table class="table table-hover mb-0">
+        <thead class="table-dark">
+          <tr><th>Category Name</th><th>Products</th></tr>
+        </thead>
+        <tbody>
+          {% for cat in categories %}
+          <tr>
+            <td>{{ cat.name }}</td>
+            <td>
+              <span class="badge bg-secondary">
+                {{ cat.product_set.count }} product{{ cat.product_set.count|pluralize }}
+              </span>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="2" class="text-muted text-center py-3">No categories yet.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Add Category Form -->
+  <div class="col-md-5">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h5 class="fw-bold mb-3">Add New Category</h5>
+        <form method="POST">
+          {% csrf_token %}
+          <div class="mb-3">
+            {{ form.name }}
+          </div>
+          <button type="submit" class="btn btn-primary w-100">Add Category</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
