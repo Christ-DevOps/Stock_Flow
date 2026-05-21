@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block title %}Roles — StockPro{% endblock %}
+{% block page_title %}Roles & Permissions{% endblock %}
+
+{% block content %}
+<div class="bg-white rounded-2xl shadow-md">
+  <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+    <h6 class="font-bold text-gray-800">🛡 Roles</h6>
+    <a href="{% url 'admin_role_create' %}" class="px-3 py-1.5 text-sm bg-primary-600 text-white rounded-lg hover:bg-primary-700"><i class="bi bi-shield-plus"></i> Add Role</a>
+  </div>
+  <div class="overflow-x-auto">
+    <table class="w-full text-sm">
+      <thead class="bg-gray-50">
+        <tr class="text-gray-600">
+          <th class="px-4 py-3 text-left font-medium">Name</th>
+          <th class="px-4 py-3 text-left font-medium">Description</th>
+          <th class="px-4 py-3 text-left font-medium">Users</th>
+          <th class="px-4 py-3 text-left font-medium"></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in roles %}
+        <tr class="border-b border-gray-100 hover:bg-gray-50/60">
+          <td class="px-4 py-3 font-bold text-gray-800">{{ r.name }}</td>
+          <td class="px-4 py-3 text-gray-600">{{ r.description|default:'—' }}</td>
+          <td class="px-4 py-3">
+            <span class="px-2 py-1 text-xs rounded-full font-medium bg-primary-500 text-white">{{ r.userprofile_set.count }} users</span>
+          </td>
+          <td class="px-4 py-3 text-right">
+            <a href="{% url 'admin_role_edit' r.pk %}" class="px-3 py-1.5 text-sm border border-gray-300 rounded hover:bg-gray-50"><i class="bi bi-pencil text-xs"></i></a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="4" class="px-4 py-8 text-center text-gray-500">No roles defined.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% block title %}Edit {{ product.name }} — StockPro{% endblock %}
+{% block page_title %}Edit Product{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+  <div class="bg-white rounded-2xl shadow-md">
+    <div class="px-6 py-4 border-b border-gray-100">
+      <h5 class="font-bold text-gray-800">✏️ Edit Product</h5>
+    </div>
+    <div class="p-6">
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="space-y-4">
+          {% for field in form %}
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1.5" for="{{ field.id_for_label }}">{{ field.label }}</label>
+              {% if field.name == 'image' and field.value %}
+                <div class="mb-2">
+                  <img src="{{ field.value.url }}" alt="" class="w-20 h-20 object-cover rounded-lg">
+                  <p class="text-xs text-gray-500 mt-1">Current image: {{ field.value }}</p>
+                </div>
+              {% endif %}
+              {% if field.name in 'description' %}
+                <textarea name="{{ field.name }}" id="{{ field.id_for_label }}" rows="4" class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all bg-white" {% if field.field.required %}required{% endif %}>{{ field.value|default:'' }}</textarea>
+              {% else %}
+                <input type="{% if field.name == 'price' or field.name == 'cost_price' %}number{% elif field.name == 'sku' or field.name == 'barcode' %}text{% else %}{{ field.field.widget.input_type|default:'text' }}{% endif %}" 
+                       name="{{ field.name }}" 
+                       id="{{ field.id_for_label }}"
+                       class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all bg-white"
+                       {% if field.value %}value="{{ field.value }}"{% endif %}
+                       {% if field.field.required %}required{% endif %}>
+              {% endif %}
+              {% if field.help_text %}
+                <p class="text-xs text-gray-500 mt-1">{{ field.help_text }}</p>
+              {% endif %}
+            </div>
+          {% endfor %}
+        </div>
+        <div class="flex justify-between gap-3 mt-6">
+          <a href="{% if product %}{% url 'product_detail' product.pk %}{% else %}{% url 'product_list' %}{% endif %}" class="px-5 py-2 border border-gray-300 text-gray-600 rounded-lg hover:bg-gray-50 font-medium">Cancel</a>
+          <button type="submit" class="px-5 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg font-medium transition-colors">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block title %}{% if action %}{{ action }}{% endif %} — StockPro{% endblock %}
+{% block page_title %}{{ action }}{% endblock %}
+
+{% block content %}
+<div class="max-w-xl mx-auto">
+  <div class="bg-white rounded-2xl shadow-md">
+    <div class="px-6 py-4 border-b border-gray-100">
+      <h5 class="font-bold text-gray-800">
+        {% if action == 'Add Stock' %}➕{% elif action == 'Remove Stock' %}✖{% else %}⚙{% endif %}
+        {{ action }} — <small class="text-gray-500">{{ product.name }}</small>
+      </h5>
+    </div>
+    <div class="p-6">
+      <form method="post">
+        {% csrf_token %}
+        <p class="text-gray-600 mb-4">Current stock: <strong>{{ product.quantity }} {{ product.unit }}</strong> (Min: {{ product.low_stock_threshold }})</p>
+        <div class="space-y-4">
+          {% for field in form %}
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1.5" for="{{ field.id_for_label }}">{{ field.label }}</label>
+              <input type="number" name="{{ field.name }}" id="{{ field.id_for_label }}" class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all bg-white" {% if field.value %}value="{{ field.value }}"{% endif %} {% if field.field.required %}required{% endif %}>
+              {% if field.help_text %}
+                <p class="text-xs text-gray-500 mt-1">{{ field.help_text }}</p>
+              {% endif %}
+            </div>
+          {% endfor %}
+        </div>
+        <div class="flex justify-between gap-3 mt-6">
+          <a href="{% url 'product_detail' product.pk %}" class="px-5 py-2 border border-gray-300 text-gray-600 rounded-lg hover:bg-gray-50 font-medium">Cancel</a>
+          <button type="submit" class="px-5 py-2 {% if action == 'Remove Stock' %}bg-danger-500 hover:bg-danger-600{% else %}bg-success-500 hover:bg-success-600{% endif %} text-white rounded-lg font-medium transition-colors">
+            Confirm {{ action }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

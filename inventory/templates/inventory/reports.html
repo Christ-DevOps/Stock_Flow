@@ -1,0 +1,284 @@
+{% extends 'base.html' %}
+{% block title %}Reports — StockPro{% endblock %}
+{% block page_title %}Reports{% endblock %}
+
+{% block content %}
+<div class="flex flex-wrap gap-2 mb-4">
+  <button type="button" class="px-4 py-2 text-sm font-medium rounded-lg border border-primary-600 bg-white text-primary-600 hover:bg-primary-50 active report-tab" data-section="valuation" onclick="showSection('valuation')">📊 Valuation</button>
+  <button type="button" class="px-4 py-2 text-sm font-medium rounded-lg border border-gray-300 bg-white text-gray-600 hover:bg-gray-50 report-tab" data-section="movement" onclick="showSection('movement')">📦 Movements</button>
+  <button type="button" class="px-4 py-2 text-sm font-medium rounded-lg border border-gray-300 bg-white text-gray-600 hover:bg-gray-50 report-tab" data-section="topsellers" onclick="showSection('topsellers')">🏆 Top Sellers</button>
+  <button type="button" class="px-4 py-2 text-sm font-medium rounded-lg border border-gray-300 bg-white text-gray-600 hover:bg-gray-50 report-tab" data-section="orders" onclick="showSection('orders')">📋 Orders</button>
+  <button type="button" class="px-4 py-2 text-sm font-medium rounded-lg border border-gray-300 bg-white text-gray-600 hover:bg-gray-50 report-tab" data-section="export" onclick="showSection('export')">⬇ Exports</button>
+</div>
+
+<div id="valuation" class="report-section">
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-5">
+    <div class="bg-primary-600 text-white rounded-2xl shadow-md p-5">
+      <small>Total Products</small>
+      <div class="font-bold text-2xl">{{ products.count }}</div>
+    </div>
+    <div class="bg-success-500 text-white rounded-2xl shadow-md p-5">
+      <small>Inventory Value</small>
+      <div class="font-bold text-2xl">${{ cash_value|floatformat:0 }}</div>
+    </div>
+    <div class="bg-warning-500 text-white rounded-2xl shadow-md p-5">
+      <small>Gross Margin</small>
+      <div class="font-bold text-2xl">${{ total_margin|floatformat:0 }}</div>
+    </div>
+    <div class="bg-danger-500 text-white rounded-2xl shadow-md p-5">
+      <small>Low Stock Items</small>
+      <div class="font-bold text-2xl">{{ low_stock_items|length|default:0 }}</div>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-2xl shadow-md">
+    <div class="px-6 py-4 border-b border-gray-100 font-bold text-gray-800">Stock Valuation by Product</div>
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead class="bg-gray-50">
+          <tr class="text-gray-600">
+            <th class="px-4 py-3">#</th>
+            <th class="px-4 py-3">Product</th>
+            <th class="px-4 py-3">Category</th>
+            <th class="px-4 py-3">Qty</th>
+            <th class="px-4 py-3">Cost</th>
+            <th class="px-4 py-3">Price</th>
+            <th class="px-4 py-3">Margin</th>
+            <th class="px-4 py-3">Total Value</th>
+            <th class="px-4 py-3">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in products %}
+          <tr class="{% if p.is_low_stock %}bg-warning-50{% elif p.is_overstock %}bg-amber-50{% endif %}">
+            <td class="px-4 py-3 text-gray-400">{{ forloop.counter }}</td>
+            <td class="px-4 py-3">
+              {% if p.image %}
+                <img src="{{ p.image.url }}" alt="" class="w-7 h-7 rounded mr-2 inline-block object-cover">
+              {% endif %}
+              <a href="{% url 'product_detail' p.pk %}" class="text-gray-800 font-semibold hover:text-primary-600">{{ p.name }}</a>
+            </td>
+            <td class="px-4 py-3 text-gray-600">{{ p.category|default:'—' }}</td>
+            <td class="px-4 py-3">{{ p.quantity }} {{ p.unit }}</td>
+            <td class="px-4 py-3">${{ p.cost_price|floatformat:2 }}</td>
+            <td class="px-4 py-3">${{ p.price|floatformat:2 }}</td>
+            <td class="px-4 py-3 {% if p.margin > 50 %}text-success-600{% endif %}">{{ p.margin }}%</td>
+            <td class="px-4 py-3 font-bold">${{ p.total_value|floatformat:2 }}</td>
+            <td class="px-4 py-3">
+              {% if p.is_low_stock %}
+                <span class="px-2 py-1 text-xs rounded-full font-medium bg-danger-500 text-white">Low</span>
+              {% elif p.is_overstock %}
+                <span class="px-2 py-1 text-xs rounded-full font-medium bg-warning-500 text-black">Over</span>
+              {% else %}
+                <span class="px-2 py-1 text-xs rounded-full font-medium bg-success-500 text-white">OK</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="9" class="px-4 py-8 text-center text-gray-500">No active products.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+        <tfoot class="bg-gray-50">
+          <tr>
+            <td colspan="7" class="px-4 py-3 text-end font-bold">Total Inventory Value</td>
+            <td class="px-4 py-3 font-bold">${{ cash_value|floatformat:2 }}</td>
+            <td></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div id="movement" class="report-section hidden">
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-5">
+    <div class="bg-success-500 text-white rounded-2xl shadow-md p-5 text-center">
+      <small>Stock In</small>
+      <div class="font-bold text-2xl">+{{ total_in }}</div>
+    </div>
+    <div class="bg-danger-500 text-white rounded-2xl shadow-md p-5 text-center">
+      <small>Stock Out</small>
+      <div class="font-bold text-2xl">-{{ total_out }}</div>
+    </div>
+    <div class="bg-info-500 text-white rounded-2xl shadow-md p-5 text-center">
+      <small>Net Change</small>
+      <div class="font-bold text-2xl">{{ total_in|add:"-"|add:total_out|floatformat:0 }}</div>
+    </div>
+    <div class="bg-warning-500 text-gray-800 rounded-2xl shadow-md p-5 text-center">
+      <small class="text-gray-800">Total Movements</small>
+      <div class="font-bold text-2xl text-gray-800">{{ movements|length }}</div>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-2xl shadow-md">
+    <div class="px-6 py-4 border-b border-gray-100 font-bold text-gray-800">Recent Stock Movements</div>
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead class="bg-gray-50">
+          <tr class="text-gray-600">
+            <th class="px-4 py-3 text-left font-medium">Product</th>
+            <th class="px-4 py-3 text-left font-medium">Type</th>
+            <th class="px-4 py-3 text-left font-medium">Qty</th>
+            <th class="px-4 py-3 text-left font-medium">Reason</th>
+            <th class="px-4 py-3 text-left font-medium">Recorded By</th>
+            <th class="px-4 py-3 text-left font-medium">Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for m in movements %}
+          <tr class="border-b border-gray-100 hover:bg-gray-50/60">
+            <td class="px-4 py-3 font-semibold">{{ m.product.name }}</td>
+            <td class="px-4 py-3">
+              {% if m.movement_type == 'IN' %}
+                <span class="px-2 py-1 text-xs rounded-full font-medium bg-success-500 text-white">Stock In</span>
+              {% elif m.movement_type == 'OUT' %}
+                <span class="px-2 py-1 text-xs rounded-full font-medium bg-danger-500 text-white">Stock Out</span>
+              {% elif m.movement_type == 'ADJUST' %}
+                <span class="px-2 py-1 text-xs rounded-full font-medium bg-warning-500 text-black">Adjustment</span>
+              {% elif m.movement_type == 'RETURN_IN' %}
+                <span class="px-2 py-1 text-xs rounded-full font-medium bg-info-500 text-white">Return In</span>
+              {% elif m.movement_type == 'RETURN_OUT' %}
+                <span class="px-2 py-1 text-xs rounded-full font-medium bg-gray-400 text-white">Return Out</span>
+              {% endif %}
+            </td>
+            <td class="px-4 py-3 font-bold">{% if m.movement_type in 'IN,RETURN_IN' %}+{% else %}-{% endif %}{{ m.quantity }}</td>
+            <td class="px-4 py-3">{{ m.get_reason_display }}</td>
+            <td class="px-4 py-3"><small class="text-gray-500">{{ m.recorded_by|default:'—' }}</small></td>
+            <td class="px-4 py-3 text-gray-400 text-xs">{{ m.date|date:"M d, Y H:i" }}</td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="6" class="px-4 py-8 text-center text-gray-500">No movements yet.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div id="topsellers" class="report-section hidden">
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div class="space-y-5">
+      <div class="bg-white rounded-2xl shadow-md">
+        <div class="px-6 py-4 border-b border-gray-100 font-bold text-gray-800">🏆 Top 5 Fast-Moving Products</div>
+        <div class="p-6">
+          {% if top_movers %}
+            {% for p in top_movers %}
+            <div class="flex items-center justify-between mb-2.5">
+              <span class="font-medium">{{ forloop.counter }}. {{ p.product__name }}</span>
+              <span class="px-2 py-1 text-xs rounded-full font-medium bg-success-500 text-white">{{ p.sold }} sold</span>
+            </div>
+            {% endfor %}
+          {% else %}
+            <p class="text-gray-500">No sales data yet.</p>
+          {% endif %}
+        </div>
+      </div>
+      <div class="bg-white rounded-2xl shadow-md">
+        <div class="px-6 py-4 border-b border-gray-100 font-bold text-gray-800">🐌 Slow-Moving Products</div>
+        <div class="p-6">
+          {% for p in slow_movers %}
+          <div class="flex items-center justify-between mb-2.5">
+            <span class="font-medium">{{ forloop.counter }}. {{ p.name }}</span>
+            <span class="px-2 py-1 text-xs rounded-full font-medium bg-warning-500 text-black">{{ p.quantity }} in stock</span>
+          </div>
+          {% empty %}
+          <p class="text-gray-500">No slow-moving items.</p>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+    <div class="bg-white rounded-2xl shadow-md h-full">
+      <div class="px-6 py-4 border-b border-gray-100 font-bold text-gray-800">Inventory Value Overview</div>
+      <div class="p-6">
+        <div style="height:200px;">
+          <canvas id="reportChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="orders" class="report-section hidden">
+  <div class="bg-white rounded-2xl shadow-md">
+    <div class="px-6 py-4 border-b border-gray-100 font-bold text-gray-800">📋 Monthly Purchase Order Totals</div>
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead class="bg-gray-50">
+          <tr class="text-gray-600">
+            <th class="px-4 py-3 text-left font-medium">Month</th>
+            <th class="px-4 py-3 text-left font-medium">Total Orders</th>
+            <th class="px-4 py-3 text-left font-medium">Total Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for o in monthly_orders %}
+          <tr class="border-b border-gray-100 hover:bg-gray-50/60">
+            <td class="px-4 py-3">{{ o.month|date:"F Y" }}</td>
+            <td class="px-4 py-3">{{ o.total }}</td>
+            <td class="px-4 py-3 font-bold">${{ o.total|floatformat:2 }}</td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="3" class="px-4 py-8 text-center text-gray-500">No orders yet.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div id="export" class="report-section hidden">
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <a href="{% url 'export_excel' %}" class="flex flex-col items-center justify-center p-8 bg-success-500 text-white rounded-2xl shadow-md hover:bg-success-600 transition-all">
+      <i class="bi bi-file-earmark-excel text-4xl mb-3"></i>
+      <span class="text-lg font-semibold">Export Stock Valuation (Excel)</span>
+    </a>
+    <a href="{% url 'export_pdf' %}" class="flex flex-col items-center justify-center p-8 bg-danger-500 text-white rounded-2xl shadow-md hover:bg-danger-600 transition-all">
+      <i class="bi bi-file-earmark-pdf text-4xl mb-3"></i>
+      <span class="text-lg font-semibold">Export Stock Valuation (PDF)</span>
+    </a>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function showSection(id) {
+  document.querySelectorAll('.report-section').forEach(el => el.classList.add('hidden')); 
+  const el = document.getElementById(id);
+  if (el) { el.classList.remove('hidden'); }
+  document.querySelectorAll('.report-tab').forEach(a => a.classList.remove('active'));
+  document.querySelectorAll('.report-tab').forEach(a => { if (a.dataset.section === id) a.classList.add('active'); });
+}
+
+Chart.defaults.font.family = "'Inter', sans-serif";
+Chart.defaults.color = '#6b7280';
+
+const catData = {{ category_labels|safe }}, valData = {{ category_values|safe }};
+new Chart(document.getElementById('reportChart'), {
+  type: 'bar',
+  data: {
+    labels: catData,
+    datasets: [{
+      label: 'Value ($)',
+      data: valData,
+      backgroundColor: 'rgba(79,70,229,.7)',
+      borderRadius: 6,
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { ticks: { color: '#6b7280' }, grid: { display: false } },
+      y: { ticks: { color: '#6b7280', callback: v => '$' + v.toLocaleString() }, grid: { color: 'rgba(0,0,0,.05)' } }
+    }
+  }
+});
+</script>
+{% endblock %}

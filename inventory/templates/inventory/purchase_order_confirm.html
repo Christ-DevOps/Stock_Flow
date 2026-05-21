@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block title %}Confirm Receive {{ order.order_number }} — StockPro{% endblock %}
+{% block page_title %}Confirm Receipt{% endblock %}
+
+{% block content %}
+<div class="max-w-xl mx-auto">
+  <div class="bg-white rounded-2xl shadow-md">
+    <div class="px-6 py-4 border-b border-gray-100">
+      <h5 class="font-bold text-gray-800">📦 Confirm Receipt</h5>
+    </div>
+    <div class="p-6">
+      <p class="mb-4">Are you sure you want to receive <strong>{{ order.order_number }}</strong>?</p>
+      <table class="w-full mb-5">
+        <tr><td class="text-gray-500 py-1.5">Supplier</td><td class="font-medium">{{ order.supplier.name }}</td></tr>
+        <tr><td class="text-gray-500 py-1.5">Product</td><td class="font-medium">{{ order.product.name }}</td></tr>
+        <tr><td class="text-gray-500 py-1.5">Qty</td><td class="font-medium">{{ order.quantity }} {{ order.product.unit }}</td></tr>
+        <tr><td class="text-gray-500 py-1.5">Amount</td><td class="font-bold text-success-600">${{ order.total_amount|floatformat:2 }}</td></tr>
+      </table>
+      <form method="post" class="flex gap-3">
+        {% csrf_token %}
+        <button type="submit" class="flex-1 px-5 py-2.5 bg-success-500 text-white rounded-lg font-medium hover:bg-success-600"><i class="bi bi-check-lg"></i> Confirm Receive</button>
+        <a href="{% url 'purchase_order_list' %}" class="flex-1 px-5 py-2.5 border border-gray-300 text-gray-600 rounded-lg font-medium hover:bg-gray-50 text-center">Cancel</a>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

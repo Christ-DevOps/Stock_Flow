@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% block title %}Alerts & Notifications — StockPro{% endblock %}
+{% block page_title %}Alerts & Notifications{% endblock %}
+
+{% block content %}
+<div class="bg-white rounded-2xl shadow-md">
+  <div class="px-6 py-4 border-b border-gray-100 font-bold text-gray-800">🔔 All Notifications</div>
+  <div class="overflow-x-auto">
+    <table class="w-full text-sm">
+      <thead class="bg-gray-50">
+        <tr class="text-gray-600">
+          <th class="px-4 py-3 text-left font-medium">Type</th>
+          <th class="px-4 py-3 text-left font-medium">Title</th>
+          <th class="px-4 py-3 text-left font-medium">Message</th>
+          <th class="px-4 py-3 text-left font-medium">#</th>
+          <th class="px-4 py-3 text-left font-medium">Date</th>
+          <th class="px-4 py-3 text-left font-medium"></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for n in notifications %}
+        <tr class="{% if not n.is_read %}bg-info-50{% endif %}">
+          <td class="px-4 py-3">
+            {% if n.notification_type == 'low_stock' %}
+              <span class="px-2 py-1 text-xs rounded-full font-medium bg-danger-500 text-white">Low Stock</span>
+            {% elif n.notification_type == 'overstock' %}
+              <span class="px-2 py-1 text-xs rounded-full font-medium bg-gray-400 text-white">Over</span>
+            {% elif n.notification_type == 'order_received' %}
+              <span class="px-2 py-1 text-xs rounded-full font-medium bg-primary-500 text-white">Order</span>
+            {% elif n.notification_type == 'stock_profit' %}
+              <span class="px-2 py-1 text-xs rounded-full font-medium bg-warning-500 text-black">Profit</span>
+            {% elif n.notification_type == 'system' %}
+              <span class="px-2 py-1 text-xs rounded-full font-medium bg-info-500 text-white">System</span>
+            {% else %}
+              <span class="px-2 py-1 text-xs rounded-full font-medium bg-gray-200 text-gray-800">{{ n.notification_type }}</span>
+            {% endif %}
+          </td>
+          <td class="px-4 py-3 font-semibold text-gray-800">{{ n.title }}</td>
+          <td class="px-4 py-3 text-gray-600">{{ n.message }}</td>
+          <td class="px-4 py-3">
+            {% if n.product %}
+              <a href="{% url 'product_detail' n.product.pk %}" class="px-2 py-1 text-xs rounded-full font-medium bg-gray-100 text-gray-800 hover:bg-gray-200">{{ n.product.name }}</a>
+            {% else %}
+              <span class="px-2 py-1 text-xs rounded-full font-medium bg-gray-100 text-gray-500">—</span>
+            {% endif %}
+          </td>
+          <td class="px-4 py-3 text-gray-400 text-xs">{{ n.created_at|date:"M d, Y H:i" }}</td>
+          <td class="px-4 py-3 text-right">
+            {% if not n.is_read %}
+              <form method="post" action="{% url 'mark_notif_read' n.pk %}" style="display:inline">{% csrf_token %}
+                <button type="submit" class="px-3 py-1.5 text-sm bg-success-500 text-white rounded hover:bg-success-600" title="Mark as read"><i class="bi bi-envelope-open-fill"></i></button>
+              </form>
+            {% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="6" class="px-4 py-8 text-center text-gray-500">No notifications yet.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

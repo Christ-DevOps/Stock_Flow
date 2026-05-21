@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% block title %}Stock Movements — StockPro{% endblock %}
+{% block page_title %}Stock Movements{% endblock %}
+
+{% block content %}
+<div class="bg-white rounded-2xl shadow-md">
+  <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+    <h6 class="font-bold text-gray-800">📋 All Stock Movements</h6>
+    <div class="inline-flex gap-2">
+      <a href="{% url 'export_excel' %}" class="px-3 py-1.5 text-sm bg-success-500 text-white rounded-lg hover:bg-success-600"><i class="bi bi-file-earmark-spreadsheet"></i> Excel</a>
+      <a href="{% url 'export_pdf' %}" class="px-3 py-1.5 text-sm bg-danger-500 text-white rounded-lg hover:bg-danger-600"><i class="bi bi-file-earmark-pdf"></i> PDF</a>
+    </div>
+  </div>
+  <div class="overflow-x-auto">
+    <table class="w-full text-sm">
+      <thead class="bg-gray-50">
+        <tr class="text-gray-600">
+          <th class="px-4 py-3 text-left font-medium">Date</th>
+          <th class="px-4 py-3 text-left font-medium">Product</th>
+          <th class="px-4 py-3 text-left font-medium">Type</th>
+          <th class="px-4 py-3 text-left font-medium">Qty</th>
+          <th class="px-4 py-3 text-left font-medium">Reason</th>
+          <th class="px-4 py-3 text-left font-medium">Notes</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for m in movements %}
+        <tr class="border-b border-gray-100 hover:bg-gray-50/60">
+          <td class="px-4 py-3 text-gray-400 text-xs">{{ m.date|date:"M d, Y H:i" }}</td>
+          <td class="px-4 py-3">
+            <a href="{% url 'product_detail' m.product.pk %}" class="text-gray-800 font-semibold hover:text-primary-600">{{ m.product.name }}</a>
+          </td>
+          <td class="px-4 py-3">
+            {% if m.movement_type == 'IN' %}
+              <span class="px-2 py-1 text-xs rounded-full font-medium bg-success-500 text-white">Stk In</span>
+            {% elif m.movement_type == 'OUT' %}
+              <span class="px-2 py-1 text-xs rounded-full font-medium bg-danger-500 text-white">Stk Out</span>
+            {% elif m.movement_type == 'ADJUST' %}
+              <span class="px-2 py-1 text-xs rounded-full font-medium bg-warning-500 text-black">Adjust</span>
+            {% elif m.movement_type == 'RETURN_IN' %}
+              <span class="px-2 py-1 text-xs rounded-full font-medium bg-info-500 text-white">Rtn In</span>
+            {% elif m.movement_type == 'RETURN_OUT' %}
+              <span class="px-2 py-1 text-xs rounded-full font-medium bg-gray-400 text-white">Rtn Out</span>
+            {% else %}
+              <span class="px-2 py-1 text-xs rounded-full font-medium bg-gray-200 text-gray-800">{{ m.movement_type }}</span>
+            {% endif %}
+          </td>
+          <td class="px-4 py-3 font-bold {% if m.movement_type in 'IN,RETURN_IN' %}text-success-600{% else %}text-danger-600{% endif %}">
+            {% if m.movement_type in 'IN,RETURN_IN' %}+{% else %}-{% endif %}{{ m.quantity }}
+          </td>
+          <td class="px-4 py-3 text-gray-600">{{ m.get_reason_display }}</td>
+          <td class="px-4 py-3"><small class="text-gray-500">{{ m.notes|default:'—' }}</small></td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="6" class="px-4 py-8 text-center text-gray-500">No movements recorded yet.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

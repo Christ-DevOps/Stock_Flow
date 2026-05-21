@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+{% block title %}{{ user.username }}'s Dashboard — StockPro{% endblock %}
+{% block page_title %}My Dashboard{% endblock %}
+
+{% block content %}
+<div class="bg-info-50 border border-info-200 text-info-700 px-4 py-3 rounded-xl shadow-sm mb-6 flex items-center gap-3">
+  <div class="text-3xl">👋</div>
+  <div>
+    <strong>Welcome, {{ user.get_full_name|default:user.username }}!</strong>
+    <p class="text-sm mb-0">You're logged in as a customer. Browse products and view your personal dashboard.</p>
+  </div>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+  <a href="{% url 'product_list' %}" class="block">
+    <div class="bg-white rounded-2xl shadow-md p-6 transition-all hover:shadow-lg hover:-translate-y-1">
+      <div class="flex items-center gap-4">
+        <div class="text-3xl">📦</div>
+        <div>
+          <h6 class="font-bold text-gray-800 mb-0">Browse Products</h6>
+          <small class="text-gray-500">View all in stock</small>
+        </div>
+      </div>
+    </div>
+  </a>
+  <a href="{% url 'profile' %}" class="block">
+    <div class="bg-white rounded-2xl shadow-md p-6 transition-all hover:shadow-lg hover:-translate-y-1">
+      <div class="flex items-center gap-4">
+        <div class="text-3xl">👤</div>
+        <div>
+          <h6 class="font-bold text-gray-800 mb-0">My Profile</h6>
+          <small class="text-gray-500">Update your info</small>
+        </div>
+      </div>
+    </div>
+  </a>
+  <a href="{% url 'reports' %}" class="block">
+    <div class="bg-white rounded-2xl shadow-md p-6 transition-all hover:shadow-lg hover:-translate-y-1">
+      <div class="flex items-center gap-4">
+        <div class="text-3xl">📊</div>
+        <div>
+          <h6 class="font-bold text-gray-800 mb-0">Stock Reports</h6>
+          <small class="text-gray-500">View analytics</small>
+        </div>
+      </div>
+    </div>
+  </a>
+</div>
+
+<div class="bg-white rounded-2xl shadow-md mb-6">
+  <div class="px-6 py-4 border-b border-gray-100 font-bold text-gray-800">📦 Quick Product Overview</div>
+  <div class="overflow-x-auto">
+    <table class="w-full text-sm">
+      <thead class="bg-gray-50">
+        <tr class="text-gray-600">
+          <th class="px-4 py-3 text-left font-medium">Product</th>
+          <th class="px-4 py-3 text-left font-medium">SKU</th>
+          <th class="px-4 py-3 text-left font-medium">Category</th>
+          <th class="px-4 py-3 text-left font-medium">In Stock</th>
+          <th class="px-4 py-3 text-left font-medium">Price</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in products %}
+        <tr class="border-b border-gray-100 hover:bg-gray-50/60">
+          <td class="px-4 py-3 font-semibold">{{ p.name }}</td>
+          <td class="px-4 py-3"><code class="text-xs bg-gray-100 px-2 py-0.5 rounded">{{ p.sku|default:'—' }}</code></td>
+          <td class="px-4 py-3 text-gray-600">{{ p.category|default:'—' }}</td>
+          <td class="px-4 py-3">
+            <span class="px-2 py-1 text-xs rounded-full font-medium 
+              {% if p.is_low_stock %}bg-danger-500 text-white
+              {% elif p.is_overstock %}bg-warning-500 text-black
+              {% else %}bg-success-500 text-white{% endif %}">
+              {{ p.quantity }} {{ p.unit }}
+            </span>
+          </td>
+          <td class="px-4 py-3 font-bold">${{ p.price|floatformat:2 }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="5" class="px-4 py-8 text-center text-gray-500">No products yet.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div class="px-6 py-3 bg-gray-50 border-t">
+    <a href="{% url 'product_list' %}" class="text-primary-600 font-semibold text-sm hover:underline">View all products →</a>
+  </div>
+</div>
+{% endblock %}

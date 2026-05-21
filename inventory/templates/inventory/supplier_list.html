@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+{% block title %}Suppliers — StockPro{% endblock %}
+{% block page_title %}Suppliers{% endblock %}
+
+{% block content %}
+<div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-4">
+  <div class="md:col-span-3">
+    <form method="get" class="flex gap-2">
+      <input type="text" name="q" class="flex-1 px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all bg-white" placeholder="Search suppliers…" value="{{ query|default:'' }}">
+      <button type="submit" class="px-5 py-2.5 border border-gray-300 text-gray-600 rounded-lg hover:bg-gray-50"><i class="bi bi-search"></i></button>
+    </form>
+  </div>
+</div>
+
+<div class="bg-white rounded-2xl shadow-md">
+  <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+    <h6 class="font-bold text-gray-800">🏢 Suppliers</h6>
+    <button class="px-4 py-2 text-sm bg-primary-600 text-white rounded-lg hover:bg-primary-700" data-bs-toggle="collapse" data-bs-target="#newSupplier">
+      <i class="bi bi-plus"></i> Add
+    </button>
+  </div>
+  
+  <div class="collapse bg-gray-50" id="newSupplier">
+    <div class="p-4">
+      <form method="post" class="grid grid-cols-1 md:grid-cols-5 gap-3">
+        {% csrf_token %}
+        <div class="md:col-span-2">
+          <input type="text" name="name" placeholder="Name" class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all bg-white" required>
+        </div>
+        <div class="md:col-span-1">
+          <input type="text" name="contact_person" placeholder="Contact" class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all bg-white">
+        </div>
+        <div class="md:col-span-1">
+          <input type="email" name="email" placeholder="Email" class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all bg-white">
+        </div>
+        <div class="md:col-span-1">
+          <input type="tel" name="phone" placeholder="Phone" class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all bg-white">
+        </div>
+        <div class="md:col-span-5 text-right">
+          <button type="submit" class="px-5 py-2 bg-primary-600 text-white rounded-lg font-medium hover:bg-primary-700">Add Supplier</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="overflow-x-auto">
+    <table class="w-full text-sm">
+      <thead class="bg-gray-50">
+        <tr class="text-gray-600">
+          <th class="px-4 py-3 text-left font-medium">Name</th>
+          <th class="px-4 py-3 text-left font-medium">Contact</th>
+          <th class="px-4 py-3 text-left font-medium">Email</th>
+          <th class="px-4 py-3 text-left font-medium">Phone</th>
+          <th class="px-4 py-3 text-left font-medium">Products</th>
+          <th class="px-4 py-3 text-left font-medium">Orders</th>
+          <th class="px-4 py-3 text-left font-medium">Active</th>
+          <th class="px-4 py-3 text-left font-medium"></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for s in suppliers %}
+        <tr class="border-b border-gray-100 hover:bg-gray-50/60">
+          <td class="px-4 py-3 font-semibold text-gray-800">{{ s.name }}</td>
+          <td class="px-4 py-3 text-gray-600">{{ s.contact_person|default:'—' }}</td>
+          <td class="px-4 py-3 text-gray-600">{{ s.email|default:'—' }}</td>
+          <td class="px-4 py-3 text-gray-600">{{ s.phone|default:'—' }}</td>
+          <td class="px-4 py-3">{{ s.product_set.count }}</td>
+          <td class="px-4 py-3">{{ s.purchase_orders.count }}</td>
+          <td class="px-4 py-3">{{ s.is_active|yesno:"Yes,No" }}</td>
+          <td class="px-4 py-3 text-right">
+            <div class="inline-flex gap-1">
+              <a href="{% url 'supplier_edit' s.pk %}" class="p-1.5 border border-gray-300 rounded hover:bg-gray-50"><i class="bi bi-pencil text-xs"></i></a>
+              <form method="post" action="{% url 'supplier_delete' s.pk %}" style="display:inline" onsubmit="return confirm('Delete this supplier?')">
+                {% csrf_token %}
+                <button type="submit" class="p-1.5 border border-danger-500 text-danger-500 rounded hover:bg-danger-50"><i class="bi bi-trash text-xs"></i></button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="8" class="px-4 py-8 text-center text-gray-500">No suppliers yet.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

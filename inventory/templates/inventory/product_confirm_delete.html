@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block title %}Archive Product — StockPro{% endblock %}
+{% block page_title %}Archive Product{% endblock %}
+
+{% block content %}
+<div class="max-w-xl mx-auto">
+  <div class="bg-white rounded-2xl shadow-md">
+    <div class="px-6 py-4 border-b border-gray-100">
+      <h5 class="font-bold text-gray-800">📦 Confirm Archive</h5>
+    </div>
+    <div class="p-6">
+      <p class="text-gray-600 mb-4">Are you sure you want to archive <strong>{{ product.name }}</strong>?</p>
+      <p class="text-gray-500 text-sm mb-6">This will mark the product as archived. It will no longer appear in active inventory lists.</p>
+      <form method="post" class="flex gap-3">
+        {% csrf_token %}
+        <button type="submit" class="flex-1 px-4 py-2.5 bg-danger-500 text-white rounded-lg font-medium hover:bg-danger-600">Archive Product</button>
+        <a href="{% url 'product_detail' product.pk %}" class="flex-1 px-4 py-2.5 border border-gray-300 text-gray-600 rounded-lg font-medium hover:bg-gray-50 text-center">Cancel</a>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

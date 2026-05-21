@@ -1,0 +1,37 @@
+from django.urls import path
+from . import views
+from .models import Product
+
+urlpatterns = [
+    path("", views.dashboard, name="dashboard"),
+    path("products/", views.product_list, name="product_list"),
+    path("products/add/", views.product_create, name="product_create"),
+    path("products/<int:pk>/", views.product_detail, name="product_detail"),
+    path("products/<int:pk>/edit/", views.product_edit, name="product_edit"),
+    path("products/<int:pk>/delete/", views.product_delete, name="product_delete"),
+    path("products/<int:pk>/archive/", views.product_archive, name="product_archive"),
+    path("variants/add/<int:pk>/", views.variant_add, name="variant_add"),
+    path("stock/add/<int:pk>/", views.stock_add, name="stock_add"),
+    path("stock/remove/<int:pk>/", views.stock_remove, name="stock_remove"),
+    path("stock/adjust/<int:pk>/", views.stock_adjust, name="stock_adjust"),
+    path("stock/quick/", views.stock_movement_quick, name="stock_movement_quick"),
+    path("stock/movements/", views.movement_list, name="movement_list"),
+    path("categories/", views.category_list, name="category_list"),
+    path("categories/add/", views.category_create, name="category_create"),
+    path("categories/<int:pk>/edit/", views.category_edit, name="category_edit"),
+    path("categories/<int:pk>/delete/", views.category_delete, name="category_delete"),
+    path("suppliers/", views.supplier_list, name="supplier_list"),
+    path("suppliers/add/", views.supplier_create, name="supplier_create"),
+    path("suppliers/<int:pk>/edit/", views.supplier_edit, name="supplier_edit"),
+    path("suppliers/<int:pk>/delete/", views.supplier_delete, name="supplier_delete"),
+    path("purchase-orders/", views.purchase_order_list, name="purchase_order_list"),
+    path("purchase-orders/add/", views.purchase_order_create, name="purchase_order_create"),
+    path("purchase-orders/<int:pk>/receive/", views.purchase_order_receive, name="purchase_order_receive"),
+    path("purchase-orders/<int:pk>/edit/", views.purchase_order_edit, name="purchase_order_edit"),
+    path("purchase-orders/<int:pk>/cancel/", views.purchase_order_cancel, name="purchase_order_cancel"),
+    path("reports/", views.reports_view, name="reports"),
+    path("reports/export/xlsx/", views.export_excel, name="export_excel"),
+    path("reports/export/pdf/", views.export_pdf, name="export_pdf"),
+    path("alerts/", views.alerts_list, name="alerts"),
+    path("notifications/<int:pk>/read/", views.mark_notification_read, name="mark_notif_read"),
+]
