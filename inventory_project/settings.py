@@ -1,3 +1,9 @@
+"""
+Django settings for inventory_project project.
+
+Merged and cleaned from previous branches.
+"""
+
 from pathlib import Path
 from datetime import timedelta
 
@@ -24,7 +30,7 @@ INSTALLED_APPS = [
 ]
 
 CRISPY_ALLOWED_TEMPLATE_PACKS = 'bootstrap5'
-CRISPY_TEMPLATE_PACK            = 'bootstrap5'
+CRISPY_TEMPLATE_PACK = 'bootstrap5'
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -36,16 +42,16 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-ROOT_URLCONF       = "inventory_project.urls"
-WSGI_APPLICATION   = "inventory_project.wsgi.application"
-LOGIN_URL          = "accounts:login"
+ROOT_URLCONF = "inventory_project.urls"
+WSGI_APPLICATION = "inventory_project.wsgi.application"
+LOGIN_URL = "accounts:login"
 LOGIN_REDIRECT_URL = "dashboard"
 LOGOUT_REDIRECT_URL = "accounts:login"
 
 TEMPLATES = [
     {
-        "BACKEND":  "django.template.backends.django.DjangoTemplates",
-        "DIRS":     [BASE_DIR / "templates", BASE_DIR / "static"],
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [BASE_DIR / "templates", BASE_DIR / "static"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -72,19 +78,16 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
 
-LANGUAGE_CODE   = "en-us"
-TIME_ZONE       = "UTC"
-USE_I18N        = True
-USE_TZ          = True
-STATIC_URL      = "static/"
+LANGUAGE_CODE = "en-us"
+TIME_ZONE = "UTC"
+USE_I18N = True
+USE_TZ = True
+STATIC_URL = "static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
-MEDIA_URL       = "/media/"
-MEDIA_ROOT      = BASE_DIR / "media"
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-EMAIL_BACKEND       = "django.core.mail.backends.console.EmailBackend"
-DEFAULT_FROM_EMAIL  = "noreply@stockpro.local"
-
-# Crispy forms
-CRISPY_TEMPLATE_PACK = "bootstrap5"
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+DEFAULT_FROM_EMAIL = "noreply@stockpro.local"

@@ -6,7 +6,7 @@ from django.utils import timezone
 from datetime import timedelta, date
 from .models import (
     Category, Supplier, Product, StockMovement,
-    PurchaseOrder, Notification,
+    PurchaseOrder, Notification, ProductVariant,
 )
 from .forms import (
     ProductForm, CategoryForm, SupplierForm, StockMovementForm,
@@ -18,6 +18,7 @@ from openpyxl.styles import PatternFill, Font, Alignment, Border, Side
 from openpyxl.utils import get_column_letter
 from accounts.decorators import manager_or_admin_required, admin_required
 from django.contrib.auth.decorators import login_required
+import json
 
 
 # ──────────────────────────────────────────────
@@ -48,7 +49,6 @@ def dashboard(request):
     recent_movements = StockMovement.objects.order_by("-date")[:15]
     unread_count = Notification.objects.filter(is_read=False).count()
 
-    category_value = []
     category_labels = []
     category_values = []
     for cat in categories:
@@ -58,27 +58,8 @@ def dashboard(request):
             category_labels.append(cat.name)
             category_values.append(round(float(cv), 2))
 
-    import json
     cats_json = json.dumps(category_labels)
     vals_json = json.dumps(category_values)
-
-    mv = StockMovement.objects.filter(date__gte=timezone.make_aware(
-        timezone.datetime.combine(thirty_days_ago, timezone.datetime.min.time())
-    ))
-    from collections import defaultdict
-    daily_in  = defaultdict(int)
-    daily_out = defaultdict(int)
-    for m in mv:
-        d = m.date.strftime("%Y-%m-%d")
-        if m.movement_type == "IN":
-            daily_in[d]  += m.quantity
-        elif m.movement_type == "OUT":
-            daily_out[d] += m.quantity
-
-    labels_30 = []
-    for i in range(30):
-        d = (thirty_days_ago + timedelta(days=i)).strftime("%Y-%m-%d")
-        labels_30.append(d[:5])
 
     context = {
         "products": products_qs,
@@ -97,6 +78,7 @@ def dashboard(request):
         "pending_orders": pending_orders,
         "recent_movements": recent_movements,
         "unread_count": unread_count,
+        "unread_nots": unread_count,
         "category_labels": cats_json,
         "category_values": vals_json,
         "low_threshold": 10,
@@ -637,7 +619,6 @@ def export_excel(request):
         cell.border = border
     alt_fill = PatternFill(start_color="f8f9ff", end_color="f8f9ff", fill_type="solid")
     for i, p in enumerate(products, 1):
-        style = "text-success" if p.is_low_stock else ("text-warning" if p.is_overstock else "")
         ws.append([
             i, p.name, p.sku or "—", p.category.name if p.category else "—",
             p.supplier.name if p.supplier else "—",
